@@ -1,0 +1,20 @@
+{
+  "name": "vastu-verified",
+  "version": "1.0.0",
+  "description": "Vastu Verified Real Estate Platform",
+  "main": "index.html",
+  "scripts": {
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "npm run build && scp -r dist/* u698056983@in-mum-web1672.main-hosting.eu:public_html/"
+  },
+  "build": {
+    "command": "npm run build",
+    "output": "dist",
+    "install": "npm install"
+  },
+  "environment": {
+    "NODE_ENV": "production",
+    "VITE_API_BASE_URL": "https://vastuverifiyed.com/api"
+  }
+}

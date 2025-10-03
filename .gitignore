@@ -102,3 +102,7 @@ AppData/
 *.bin
 *.blb
 *.CSV
+
+# Cursor IDE files
+.cursor/
+*.cursor

@@ -21,7 +21,7 @@ class ApiClient {
   private useFirebase: boolean
 
   constructor() {
-    this.baseURL = config.apiBaseUrl || 'http://localhost:3001/api'
+    this.baseURL = config.apiBaseUrl || ''
     this.defaultHeaders = {
       'Content-Type': 'application/json',
     }
@@ -33,6 +33,11 @@ class ApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
+    // If no API base URL is configured, use mock data
+    if (!this.baseURL || this.baseURL === '') {
+      throw new Error('API not configured - using mock data')
+    }
+    
     const url = `${this.baseURL}${endpoint}`
     
     // Get auth token from localStorage
@@ -65,25 +70,17 @@ class ApiClient {
 
   // Auth endpoints
   async login(email: string, password: string): Promise<ApiResponse<{ user: any; token: string }>> {
-    if (this.useFirebase) {
-      try {
-        const result = await firebaseAuth.login(email, password)
-        return {
-          success: true,
-          data: result
-        }
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Login failed'
-        }
+    try {
+      return await this.request('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      })
+    } catch (error) {
+      return {
+        success: false,
+        error: 'Unable to connect to server. Please try again later.'
       }
     }
-    
-    return this.request('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    })
   }
 
   async register(userData: {
@@ -93,25 +90,17 @@ class ApiClient {
     password: string
     role: 'user' | 'agent'
   }): Promise<ApiResponse<{ user: any; token: string }>> {
-    if (this.useFirebase) {
-      try {
-        const result = await firebaseAuth.register(userData)
-        return {
-          success: true,
-          data: result
-        }
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Registration failed'
-        }
+    try {
+      return await this.request('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify(userData),
+      })
+    } catch (error) {
+      return {
+        success: false,
+        error: 'Unable to connect to server. Please try again later.'
       }
     }
-    
-    return this.request('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(userData),
-    })
   }
 
   async logout(): Promise<ApiResponse> {

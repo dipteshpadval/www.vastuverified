@@ -8,7 +8,10 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext js,jsx,ts,tsx",
-    "lint:fix": "eslint . --ext js,jsx,ts,tsx --fix"
+    "lint:fix": "eslint . --ext js,jsx,ts,tsx --fix",
+    "deploy": "npm run build && scp -r dist/* u698056983@in-mum-web1672.main-hosting.eu:public_html/",
+    "deploy:hostinger": "npm run build && scp -r dist/* u698056983@in-mum-web1672.main-hosting.eu:public_html/",
+    "deploy:github": "git add . && git commit -m 'Auto-deploy' && git push origin main"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",
