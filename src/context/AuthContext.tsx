@@ -165,25 +165,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const sanitizedPassword = sanitizeInput(password)
       
       try {
-        // Use real API authentication
-        const response = await apiClient.login(sanitizedEmail, sanitizedPassword)
+        // Use Firebase authentication
+        const { firebaseAuth } = await import('../services/firebaseAuth')
+        const result = await firebaseAuth.login(sanitizedEmail, sanitizedPassword)
         
-        if (response.success && response.data) {
-          const { user, token } = response.data
+        if (result.success && result.user) {
+          // Store user data
+          localStorage.setItem('auth:token', result.token || 'firebase-token')
+          localStorage.setItem('auth:user', JSON.stringify(result.user))
           
-          // Store token and user data
-          localStorage.setItem('auth:token', token)
-          localStorage.setItem('auth:user', JSON.stringify(user))
-          
-          dispatch({ type: 'LOGIN_SUCCESS', payload: user })
+          dispatch({ type: 'LOGIN_SUCCESS', payload: result.user })
           return
         } else {
-          dispatch({ type: 'LOGIN_FAILURE', payload: response.error || 'Login failed' })
+          dispatch({ type: 'LOGIN_FAILURE', payload: result.error || 'Login failed' })
           return
         }
-      } catch (apiError) {
-        console.error('Login API error:', apiError)
-        dispatch({ type: 'LOGIN_FAILURE', payload: 'Login failed. Please check your connection and try again.' })
+      } catch (firebaseError) {
+        console.error('Firebase login error:', firebaseError)
+        dispatch({ type: 'LOGIN_FAILURE', payload: 'Login failed. Please try again.' })
         return
       }
       
@@ -224,25 +223,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       
       try {
-        // Use real API registration
-        const response = await apiClient.register(sanitizedData)
+        // Use Firebase authentication
+        const { firebaseAuth } = await import('../services/firebaseAuth')
+        const result = await firebaseAuth.register(sanitizedData)
         
-        if (response.success && response.data) {
-          const { user, token } = response.data
+        if (result.success && result.user) {
+          // Store user data
+          localStorage.setItem('auth:token', result.token || 'firebase-token')
+          localStorage.setItem('auth:user', JSON.stringify(result.user))
           
-          // Store token and user data
-          localStorage.setItem('auth:token', token)
-          localStorage.setItem('auth:user', JSON.stringify(user))
-          
-          dispatch({ type: 'LOGIN_SUCCESS', payload: user })
+          dispatch({ type: 'LOGIN_SUCCESS', payload: result.user })
           return
         } else {
-          dispatch({ type: 'LOGIN_FAILURE', payload: response.error || 'Registration failed' })
+          dispatch({ type: 'LOGIN_FAILURE', payload: result.error || 'Registration failed' })
           return
         }
-      } catch (apiError) {
-        console.error('Registration API error:', apiError)
-        dispatch({ type: 'LOGIN_FAILURE', payload: 'Registration failed. Please check your connection and try again.' })
+      } catch (firebaseError) {
+        console.error('Firebase registration error:', firebaseError)
+        dispatch({ type: 'LOGIN_FAILURE', payload: 'Registration failed. Please try again.' })
         return
       }
       

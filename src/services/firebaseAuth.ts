@@ -1,153 +1,156 @@
 import { 
-  signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
   signOut, 
   updateProfile,
-  User as FirebaseUser
+  User
 } from 'firebase/auth'
 import { doc, setDoc, getDoc } from 'firebase/firestore'
 import { auth, db } from '../config/firebase'
-import { User } from '../context/AuthContext'
 
-export interface FirebaseAuthResult {
-  user: User
-  token: string
+export interface FirebaseUser {
+  id: string
+  name: string
+  email: string
+  phone: string
+  role: 'user' | 'agent'
+  avatar?: string
+  preferences: {
+    notifications: boolean
+    emailUpdates: boolean
+    smsUpdates: boolean
+  }
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AuthResult {
+  success: boolean
+  user?: FirebaseUser
+  token?: string
+  error?: string
 }
 
 export const firebaseAuth = {
-  // Login with email and password
-  async login(email: string, password: string): Promise<FirebaseAuthResult> {
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password)
-      const firebaseUser = userCredential.user
-      const token = await firebaseUser.getIdToken()
-      
-      // Get user data from Firestore
-      const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid))
-      const userData = userDoc.exists() ? userDoc.data() : null
-      
-      const user: User = {
-        id: firebaseUser.uid,
-        name: userData?.name || firebaseUser.displayName || '',
-        email: firebaseUser.email || '',
-        phone: userData?.phone || '',
-        avatar: userData?.avatar || firebaseUser.photoURL || '',
-        role: userData?.role || 'user',
-        verified: firebaseUser.emailVerified,
-        preferences: userData?.preferences || {
-          propertyTypes: [],
-          locations: [],
-          priceRange: { min: 0, max: 10000000 },
-          notifications: {
-            email: true,
-            sms: false,
-            push: true,
-          },
-        },
-        createdAt: userData?.createdAt || new Date().toISOString(),
-        lastLogin: new Date().toISOString(),
-      }
-      
-      return { user, token }
-    } catch (error) {
-      console.error('Firebase login error:', error)
-      throw new Error('Login failed')
-    }
-  },
-
-  // Register new user
   async register(userData: {
     name: string
     email: string
     phone: string
     password: string
     role: 'user' | 'agent'
-  }): Promise<FirebaseAuthResult> {
+  }): Promise<AuthResult> {
     try {
+      // Create user with Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, userData.email, userData.password)
-      const firebaseUser = userCredential.user
-      
-      // Update Firebase profile
-      await updateProfile(firebaseUser, {
-        displayName: userData.name,
+      const user = userCredential.user
+
+      // Update user profile
+      await updateProfile(user, {
+        displayName: userData.name
       })
-      
+
       // Create user document in Firestore
-      const user: User = {
-        id: firebaseUser.uid,
+      const firebaseUser: FirebaseUser = {
+        id: user.uid,
         name: userData.name,
         email: userData.email,
         phone: userData.phone,
         role: userData.role,
-        verified: false,
+        avatar: null,
         preferences: {
-          propertyTypes: [],
-          locations: [],
-          priceRange: { min: 0, max: 10000000 },
-          notifications: {
-            email: true,
-            sms: false,
-            push: true,
-          },
+          notifications: true,
+          emailUpdates: true,
+          smsUpdates: false
         },
         createdAt: new Date().toISOString(),
-        lastLogin: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       }
-      
-      await setDoc(doc(db, 'users', firebaseUser.uid), {
-        ...user,
-        updatedAt: new Date().toISOString(),
-      })
-      
-      const token = await firebaseUser.getIdToken()
-      return { user, token }
-    } catch (error) {
-      console.error('Firebase registration error:', error)
-      throw new Error('Registration failed')
+
+      await setDoc(doc(db, 'users', user.uid), firebaseUser)
+
+      // Get ID token
+      const token = await user.getIdToken()
+
+      return {
+        success: true,
+        user: firebaseUser,
+        token
+      }
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message || 'Registration failed'
+      }
     }
   },
 
-  // Logout user
+  async login(email: string, password: string): Promise<AuthResult> {
+    try {
+      // Sign in with Firebase Auth
+      const userCredential = await signInWithEmailAndPassword(auth, email, password)
+      const user = userCredential.user
+
+      // Get user data from Firestore
+      const userDoc = await getDoc(doc(db, 'users', user.uid))
+      
+      if (!userDoc.exists()) {
+        return {
+          success: false,
+          error: 'User data not found'
+        }
+      }
+
+      const userData = userDoc.data() as FirebaseUser
+
+      // Get ID token
+      const token = await user.getIdToken()
+
+      return {
+        success: true,
+        user: userData,
+        token
+      }
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message || 'Login failed'
+      }
+    }
+  },
+
   async logout(): Promise<void> {
     try {
       await signOut(auth)
     } catch (error) {
-      console.error('Firebase logout error:', error)
-      throw new Error('Logout failed')
+      console.error('Logout error:', error)
     }
   },
 
-  // Update user profile
-  async updateUser(uid: string, userData: Partial<User>): Promise<User> {
+  async getCurrentUser(): Promise<FirebaseUser | null> {
     try {
-      const userRef = doc(db, 'users', uid)
-      await setDoc(userRef, {
-        ...userData,
-        updatedAt: new Date().toISOString(),
-      }, { merge: true })
-      
-      // Return updated user data
-      const userDoc = await getDoc(userRef)
-      return userDoc.data() as User
-    } catch (error) {
-      console.error('Firebase update user error:', error)
-      throw new Error('Update failed')
-    }
-  },
+      const user = auth.currentUser
+      if (!user) return null
 
-  // Get current user
-  async getCurrentUser(): Promise<User | null> {
-    try {
-      const firebaseUser = auth.currentUser
-      if (!firebaseUser) return null
-      
-      const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid))
+      const userDoc = await getDoc(doc(db, 'users', user.uid))
       if (!userDoc.exists()) return null
-      
-      return userDoc.data() as User
+
+      return userDoc.data() as FirebaseUser
     } catch (error) {
-      console.error('Firebase get current user error:', error)
+      console.error('Get current user error:', error)
       return null
+    }
+  },
+
+  async updateUser(userId: string, updates: Partial<FirebaseUser>): Promise<boolean> {
+    try {
+      await setDoc(doc(db, 'users', userId), {
+        ...updates,
+        updatedAt: new Date().toISOString()
+      }, { merge: true })
+      return true
+    } catch (error) {
+      console.error('Update user error:', error)
+      return false
     }
   }
 }
