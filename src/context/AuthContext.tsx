@@ -182,33 +182,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           return
         }
       } catch (apiError) {
-        // Fallback to mock data when API is not available
-        console.log('API not available, using mock data for login')
-        
-        // Create mock user data
-        const mockUser = {
-          id: '1',
-          name: sanitizedEmail.split('@')[0],
-          email: sanitizedEmail,
-          phone: '+91 98765 43210',
-          role: 'user' as const,
-          avatar: null,
-          preferences: {
-            notifications: true,
-            emailUpdates: true,
-            smsUpdates: false
-          },
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }
-        
-        const mockToken = 'mock-jwt-token-' + Date.now()
-        
-        // Store mock data
-        localStorage.setItem('auth:token', mockToken)
-        localStorage.setItem('auth:user', JSON.stringify(mockUser))
-        
-        dispatch({ type: 'LOGIN_SUCCESS', payload: mockUser })
+        console.error('Login API error:', apiError)
+        dispatch({ type: 'LOGIN_FAILURE', payload: 'Login failed. Please check your connection and try again.' })
         return
       }
       
@@ -266,33 +241,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           return
         }
       } catch (apiError) {
-        // Fallback to mock data when API is not available
-        console.log('API not available, using mock data for registration')
-        
-        // Create mock user data
-        const mockUser = {
-          id: '1',
-          name: sanitizedData.name,
-          email: sanitizedData.email,
-          phone: sanitizedData.phone,
-          role: sanitizedData.role,
-          avatar: null,
-          preferences: {
-            notifications: true,
-            emailUpdates: true,
-            smsUpdates: false
-          },
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }
-        
-        const mockToken = 'mock-jwt-token-' + Date.now()
-        
-        // Store mock data
-        localStorage.setItem('auth:token', mockToken)
-        localStorage.setItem('auth:user', JSON.stringify(mockUser))
-        
-        dispatch({ type: 'LOGIN_SUCCESS', payload: mockUser })
+        console.error('Registration API error:', apiError)
+        dispatch({ type: 'LOGIN_FAILURE', payload: 'Registration failed. Please check your connection and try again.' })
         return
       }
       
