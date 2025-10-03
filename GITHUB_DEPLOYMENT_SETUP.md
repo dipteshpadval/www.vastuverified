@@ -22,7 +22,7 @@ git push origin main
 ### Step 3: Check Deployment Status
 - **Go to "Actions" tab in your GitHub repository**
 - **Watch the deployment progress**
-- **Your website will be live at**: https://vastuverifiyed.com
+- **Your website will be live at**: https://www.vastuverified.com
 
 ## Method 2: Hostinger GitHub Integration
 
@@ -41,7 +41,7 @@ In Hostinger Control Panel, add:
 MONGODB_URI=mongodb+srv://dipteshpadval:Diptesh6272@cluster0.avhq4bo.mongodb.net/vastuverifiyed?retryWrites=true&w=majority&appName=Cluster0
 JWT_SECRET=your-super-secret-jwt-key-for-production
 NODE_ENV=production
-VITE_API_BASE_URL=https://vastuverifiyed.com/api
+VITE_API_BASE_URL=https://www.vastuverified.com/api
 ```
 
 ## Method 3: One-Click Deploy Script
@@ -76,7 +76,7 @@ node auto-deploy.js
 1. **Code pushed to GitHub** → Triggers deployment
 2. **GitHub Actions builds** your project
 3. **Files uploaded** to Hostinger
-4. **Website goes live** at https://vastuverifiyed.com
+4. **Website goes live** at https://www.vastuverified.com
 5. **Database connected** to MongoDB Atlas
 
 ## 🔄 Future Updates:

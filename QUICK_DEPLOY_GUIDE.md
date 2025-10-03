@@ -1,7 +1,7 @@
 # 🚀 Quick Deploy Guide - Hostinger + GitHub
 
 ## Your Setup:
-- **Domain**: vastuverifiyed.com
+- **Domain**: www.vastuverified.com
 - **GitHub**: https://github.com/dipteshpadval/www.vastuverified.git
 - **SSH Host**: in-mum-web1672.main-hosting.eu
 - **SSH User**: u698056983
@@ -90,7 +90,7 @@ scp -r backend/* u698056983@in-mum-web1672.main-hosting.eu:public_html/api/
 4. Full-stack website live!
 
 ## Your Website Will Be Live At:
-🌐 **https://vastuverifiyed.com**
+🌐 **https://www.vastuverified.com**
 
 ## Next Steps After Deployment:
 1. **Test user registration**

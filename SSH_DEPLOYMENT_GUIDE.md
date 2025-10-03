@@ -3,7 +3,7 @@
 ## Your SSH Information:
 - **Host**: `in-mum-web1672.main-hosting.eu`
 - **User**: `u698056983`
-- **Domain**: `vastuverifiyed.com`
+- **Domain**: `www.vastuverified.com`
 - **SSH Key**: Already configured ✅
 
 ---
@@ -159,7 +159,7 @@ cat > .env.production << EOF
 MONGODB_URI=mongodb+srv://dipteshpadval:YOUR_PASSWORD@cluster0.avhq4bo.mongodb.net/vastuverifiyed?retryWrites=true&w=majority&appName=Cluster0
 JWT_SECRET=your-super-secret-jwt-key-for-production
 NODE_ENV=production
-VITE_API_BASE_URL=https://vastuverifiyed.com/api
+VITE_API_BASE_URL=https://www.vastuverified.com/api
 EOF
 ```
 
@@ -174,7 +174,7 @@ scp .env.production u698056983@in-mum-web1672.main-hosting.eu:public_html/api/.e
 ## 🧪 **Testing Your Deployment**
 
 ### **Step 1: Test Website**
-1. **Visit**: `https://vastuverifiyed.com`
+1. **Visit**: `https://www.vastuverified.com`
 2. **Check**: Homepage loads correctly
 3. **Test**: User registration
 4. **Test**: User login
@@ -183,10 +183,10 @@ scp .env.production u698056983@in-mum-web1672.main-hosting.eu:public_html/api/.e
 ### **Step 2: Test API Endpoints**
 ```bash
 # Test health check
-curl https://vastuverifiyed.com/api/health
+curl https://www.vastuverified.com/api/health
 
 # Test user registration
-curl -X POST https://vastuverifiyed.com/api/auth/register \
+curl -X POST https://www.vastuverified.com/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"name":"Test User","email":"test@example.com","phone":"+91 98765 43210","password":"password123","role":"user"}'
 ```
@@ -260,7 +260,7 @@ ssh u698056983@in-mum-web1672.main-hosting.eu "sudo systemctl restart apache2"
 ## 🎉 **Success Checklist**
 
 Your deployment is successful when:
-- [ ] **Website loads**: `https://vastuverifiyed.com`
+- [ ] **Website loads**: `https://www.vastuverified.com`
 - [ ] **User registration works**
 - [ ] **User login works**
 - [ ] **Property listing works**
