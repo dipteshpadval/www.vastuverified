@@ -3,7 +3,7 @@ import { firebaseAuth } from '../services/firebaseAuth'
 import { firebaseProperties } from '../services/firebaseProperties'
 
 export interface ApiResponse<T = any> {
-  data: T
+  data?: T
   message?: string
   success: boolean
   error?: string
@@ -33,9 +33,9 @@ class ApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
-    // If no API base URL is configured, use mock data
+    // If no API base URL is configured, throw error
     if (!this.baseURL || this.baseURL === '') {
-      throw new Error('API not configured - using mock data')
+      throw new Error('API not configured. Please set VITE_API_BASE_URL environment variable.')
     }
     
     const url = `${this.baseURL}${endpoint}`
@@ -54,6 +54,12 @@ class ApiClient {
         ...options,
         headers,
       })
+
+      // Handle non-JSON responses
+      const contentType = response.headers.get('content-type')
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error(`Server returned non-JSON response: ${response.status}`)
+      }
 
       const data = await response.json()
 
@@ -275,29 +281,16 @@ class ApiClient {
     })
   }
 
-  // Property management endpoints
-  async createProperty(propertyData: any): Promise<ApiResponse<any>> {
-    return this.request('/properties', {
-      method: 'POST',
-      body: JSON.stringify(propertyData),
-    })
-  }
-
-  async updateProperty(propertyId: string, propertyData: any): Promise<ApiResponse<any>> {
-    return this.request(`/properties/${propertyId}`, {
-      method: 'PUT',
-      body: JSON.stringify(propertyData),
-    })
-  }
-
-  async deleteProperty(propertyId: string): Promise<ApiResponse> {
-    return this.request(`/properties/${propertyId}`, {
-      method: 'DELETE',
-    })
-  }
-
+  // Get user's properties
   async getUserProperties(): Promise<ApiResponse<any[]>> {
-    return this.request('/properties/user')
+    try {
+      return await this.request('/properties/user/my-properties')
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to fetch user properties'
+      }
+    }
   }
 }
 

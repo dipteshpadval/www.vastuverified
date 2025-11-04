@@ -23,7 +23,7 @@ import {
 } from 'lucide-react'
 import { useProperty } from '../../context/PropertyContext'
 import { formatCurrency, formatArea, formatPricePerSqft } from '../../utils/helpers'
-import { mockProperties, priceRanges } from '../../data/mockData'
+import { apiClient } from '../../utils/apiClient'
 import VastuVerifiedLogo from '../common/VastuVerifiedLogo'
 import VastuVerifiedIcon from '../common/VastuVerifiedIcon'
 
@@ -40,12 +40,29 @@ const SellProperties: React.FC = () => {
     amenities: [] as string[],
   })
   
-  const { state, searchProperties, toggleFavorite } = useProperty()
+  const { state, searchProperties, toggleFavorite, dispatch } = useProperty()
 
-  // Filter properties for sell transaction type
-  const sellProperties = mockProperties.filter(property => property.transactionType === 'sell')
+  // Filter properties for sell transaction type from API data
+  const sellProperties = state.properties.filter(property => property.transactionType === 'sell')
 
   useEffect(() => {
+    // Load properties from API
+    const loadProperties = async () => {
+      try {
+        const response = await apiClient.getProperties({ 
+          transactionType: 'sell',
+          limit: 100 
+        })
+        if (response.success && response.data) {
+          dispatch({ type: 'SET_PROPERTIES', payload: response.data.properties })
+        }
+      } catch (error) {
+        console.error('Failed to load properties:', error)
+      }
+    }
+
+    loadProperties()
+
     // Get URL parameters
     const urlParams = new URLSearchParams(window.location.search)
     const locationParam = urlParams.get('location')
@@ -67,7 +84,9 @@ const SellProperties: React.FC = () => {
     searchProperties(initialFilters)
   }, [])
 
-  const properties = state.filteredProperties.length > 0 ? state.filteredProperties : sellProperties
+  const properties = state.filteredProperties.length > 0 
+    ? state.filteredProperties.filter(p => p.transactionType === 'sell')
+    : sellProperties
 
   const handleFilterChange = (key: string, value: any) => {
     setFilters(prev => ({

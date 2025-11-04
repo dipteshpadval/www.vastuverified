@@ -11,7 +11,8 @@ import {
   Star,
   Eye,
   Share2,
-  Phone
+  Phone,
+  Home
 } from 'lucide-react'
 import { useProperty } from '../../context/PropertyContext'
 import { formatCurrency, formatArea, formatPricePerSqft } from '../../utils/helpers'
@@ -53,14 +54,41 @@ const FeaturedProperties: React.FC = () => {
           </p>
         </motion.div>
 
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-        >
-          {featuredProperties.map((property) => (
+        {featuredProperties.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="col-span-full text-center py-12"
+          >
+            <div className="bg-gray-50 rounded-xl p-8 max-w-md mx-auto">
+              <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Home className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                No Featured Properties Yet
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Featured properties will appear here once added by property owners or agents.
+              </p>
+              <Link
+                to="/list-property"
+                className="btn btn-primary"
+              >
+                List Your Property
+              </Link>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          >
+            {featuredProperties.map((property) => (
             <motion.div
               key={property.id}
               variants={itemVariants}
@@ -225,7 +253,8 @@ const FeaturedProperties: React.FC = () => {
               </div>
             </motion.div>
           ))}
-        </motion.div>
+          </motion.div>
+        )}
 
         {/* View All Button */}
         <motion.div

@@ -14,7 +14,6 @@ import {
   Shield
 } from 'lucide-react'
 import { useProperty } from '../../context/PropertyContext'
-import { mockProperties } from '../../data/mockData'
 
 const Hero: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('')

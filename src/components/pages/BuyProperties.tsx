@@ -23,7 +23,7 @@ import {
 } from 'lucide-react'
 import { useProperty } from '../../context/PropertyContext'
 import { formatCurrency, formatArea, formatPricePerSqft } from '../../utils/helpers'
-import { mockProperties, priceRanges } from '../../data/mockData'
+import { apiClient } from '../../utils/apiClient'
 import VastuVerifiedLogo from '../common/VastuVerifiedLogo'
 import VastuVerifiedIcon from '../common/VastuVerifiedIcon'
 
@@ -32,6 +32,7 @@ const BuyProperties: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [showFilters, setShowFilters] = useState(false)
   const [sortBy, setSortBy] = useState('newest')
+  const [loading, setLoading] = useState(false)
   const [filters, setFilters] = useState({
     location: searchParams.get('search') || '',
     propertyType: [] as string[],
@@ -40,14 +41,32 @@ const BuyProperties: React.FC = () => {
     amenities: [] as string[],
   })
   
-  const { state, searchProperties, toggleFavorite } = useProperty()
+  const { state, searchProperties, toggleFavorite, dispatch } = useProperty()
 
-  // Filter properties for buy transaction type (includes both original buy properties and newly listed sell properties)
-  const buyProperties = mockProperties.filter(property => property.transactionType === 'buy')
-  const contextBuyProperties = state.properties.filter(property => property.transactionType === 'buy')
-  const allBuyProperties = [...contextBuyProperties, ...buyProperties.filter(p => !contextBuyProperties.some(cp => cp.id === p.id))]
+  // Filter properties for buy transaction type from API data
+  const buyProperties = state.properties.filter(property => property.transactionType === 'buy')
 
   useEffect(() => {
+    // Load properties from API
+    const loadProperties = async () => {
+      setLoading(true)
+      try {
+        const response = await apiClient.getProperties({ 
+          transactionType: 'buy',
+          limit: 100 
+        })
+        if (response.success && response.data) {
+          dispatch({ type: 'SET_PROPERTIES', payload: response.data.properties })
+        }
+      } catch (error) {
+        console.error('Failed to load properties:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadProperties()
+
     // Get URL parameters
     const urlParams = new URLSearchParams(window.location.search)
     const locationParam = urlParams.get('location')
@@ -69,7 +88,9 @@ const BuyProperties: React.FC = () => {
     searchProperties(initialFilters)
   }, [])
 
-  const properties = state.filteredProperties.length > 0 ? state.filteredProperties : allBuyProperties
+  const properties = state.filteredProperties.length > 0 
+    ? state.filteredProperties.filter(p => p.transactionType === 'buy')
+    : buyProperties
 
   const handleFilterChange = (key: string, value: any) => {
     setFilters(prev => ({

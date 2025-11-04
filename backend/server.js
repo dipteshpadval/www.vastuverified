@@ -6,7 +6,7 @@ const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 // Import database connection
-const connectDB = require('../src/config/database');
+const connectDB = require('./config/database');
 
 // Import routes
 const authRoutes = require('./routes/auth');

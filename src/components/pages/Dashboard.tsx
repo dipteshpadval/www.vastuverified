@@ -25,7 +25,7 @@ import {
 import { useAuth } from '../../context/AuthContext'
 import { useProperty } from '../../context/PropertyContext'
 import { formatCurrency, formatArea, formatDate } from '../../utils/helpers'
-import { mockProperties } from '../../data/mockData'
+import { apiClient } from '../../utils/apiClient'
 
 const Dashboard: React.FC = () => {
   const { state: authState, logout, updateUser } = useAuth()
@@ -42,8 +42,8 @@ const Dashboard: React.FC = () => {
     })
   }, [authState.user])
 
-  const recentProperties = mockProperties.slice(0, 4)
-  const favoriteProperties = mockProperties.filter(property => 
+  const recentProperties = propertyState.properties.slice(0, 4)
+  const favoriteProperties = propertyState.properties.filter(property => 
     propertyState.favorites.includes(property.id)
   )
 
